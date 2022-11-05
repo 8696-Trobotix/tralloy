@@ -30,3 +30,13 @@
 *.exe
 *.out
 *.app
+
+# Custom
+native/
+src/xterm/
+# Can be done in Replit too!
+*.replit
+*.nix
+wasm/
+node_modules/
+*.json

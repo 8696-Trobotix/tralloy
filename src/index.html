@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <title>tralloy</title>
+        <script src="xterm/xterm.js"></script>
+        <script src="xterm/xterm-addon-fit.js"></script>
+        <script src="xterm/xterm-addon-webgl.js"></script>
+        <link rel="stylesheet" href="xterm/xterm.css" />
+   <!-- Uncomment the following lines to use a cached version of xterm from jsdelivr. -->
+   <!-- The Terminal object should then be constructed with Terminal() due to the proposed API option only being needed in versions 5.0.0+. -->
+   <!-- <script src="https://cdn.jsdelivr.net/npm/xterm@4.18.0/lib/xterm.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/xterm-addon-fit@0.5.0/lib/xterm-addon-fit.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/xterm-addon-webgl@0.11.4/lib/xterm-addon-webgl.min.js"></script>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xterm@4.11.0/css/xterm.css"></link> -->
+        <link rel="shortcut icon" type="image/x-icon" href="favicon.png" />
+        <script>
+            if ("serviceWorker" in navigator && !window.crossOriginIsolated) {
+                navigator.serviceWorker.register(new URL("./sw.js", location.href)).then(
+                    registration => {
+                        if (registration.active && !navigator.serviceWorker.controller) {
+                            window.location.reload();
+                        }
+                    },
+                );
+            }
+        </script>
+    </head>
+    <body>
+        <div id="terminal"></div>
+        <div id="footer"><a style="color: lime;" href="https://8696-trobotix.github.io/">Main Page</a> | Please try reloading if nothing appears.</div>
+    </body>
+    <script>
+        let stdin_buffer = [];
+        const stdin = () => {
+            return stdin_buffer.shift() || 0;
+        }
+        let stdout_buffer = [];
+        const stdout = code => {
+            if (code == 0) {
+                term.write(new Uint8Array(stdout_buffer));
+                stdout_buffer = [];
+            }else {
+                stdout_buffer.push(code);
+            }
+        }
+        let stderrbuffer = [];
+        const stderr = code => {
+            if (code == 0 || code == 10) {
+                console.error(String.fromCodePoint(...stderrbuffer));
+                stderrbuffer = [];
+            }else {
+                stderrbuffer.push(code);
+            }
+        }
+        const term = new Terminal({
+            allowProposedApi: true
+        });
+        const term_element = document.querySelector('#terminal');
+        term.open(term_element);
+        term.loadAddon(new (WebglAddon.WebglAddon)());
+        const onBinary = e => {
+            for(c of e) stdin_buffer.push(c.charCodeAt(0));
+        }
+        term.onBinary(onBinary);
+        term.onData(onBinary);
+        window.Module = {
+            preRun: () => {
+                FS.init(stdin, stdout, stderr);
+            },
+            postRun: [],
+            onRuntimeInitialized: () => {
+                const fit_addon = new (FitAddon.FitAddon)();
+                term.loadAddon(fit_addon);
+                fit_addon.fit();
+                const resize_handler = () => {
+                    const {cols, rows} = fit_addon.proposeDimensions();
+                    term.resize(cols, rows);
+                    window.Module._ftxui_on_resize(cols, rows);
+                };
+                const resize_observer = new ResizeObserver(resize_handler);
+                resize_observer.observe(term_element);
+                resize_handler();
+                term.write('\x1b[?47h');
+            },
+        };
+    </script>
+    <script async src="tralloy.js"></script>
+    <style>
+        body {
+            background-color: black;
+        }
+        #terminal {
+            width: 99vw;
+            height: 95vh;
+        }
+        #footer {
+            color: lightgrey;
+            font-size: 95%;
+            font-family: 'Courier New', Courier, monospace;
+        }
+    </style>
+</html>
