@@ -4,20 +4,21 @@
 #include <emscripten.h>
 #endif
 #include <fstream>
-#include <cstdlib>
 #include <string>
 
 // Please see header file for details.
-// Note: Assumes text data, for now...
 
-bool tralloy::data::exists(const char *key) {
+bool tralloy::data::exists(const std::string &key) {
     #if defined(__EMSCRIPTEN__)
     int exists, err;
-    emscripten_idb_exists(TRALLOY_DB, key, &exists, &err);
+    emscripten_idb_exists(TRALLOY_DB, 
+                          (key + DEFAULT_FILE_EXTENSION).c_str(), 
+                          &exists, 
+                          &err);
     if (exists == 0 || err != 0) return false;
     return true;
     #else
-    std::ifstream fin {key};
+    std::ifstream fin {key + DEFAULT_FILE_EXTENSION};
     if (!fin.is_open()) {
         fin.close();
         return false;
@@ -27,58 +28,62 @@ bool tralloy::data::exists(const char *key) {
     #endif
 }
 
-bool tralloy::data::load(const char *key, std::string *buff, int *bytes) {
+bool tralloy::data::load(const std::string &key, std::string &buff) {
     #if defined(__EMSCRIPTEN__)
     void **b {nullptr};
-    int err;
-    emscripten_idb_load(TRALLOY_DB, key, b, bytes, &err);
+    int err, bytes;
+    emscripten_idb_load(TRALLOY_DB, 
+                        (key + DEFAULT_FILE_EXTENSION).c_str(), 
+                        b, 
+                        &bytes, 
+                        &err);
     if (err != 0) return false;
-    buff->clear();
-    for (int i {}; i < *bytes; ++i) *buff += ((char *)(*b))[i];
+    buff.assign((char *)(*b), bytes);
     free(*b);
     return true;
     #else
     if (!tralloy::data::exists(key)) return false;
-    std::ifstream fin {key};
+    std::ifstream fin {key + DEFAULT_FILE_EXTENSION};
     std::string b;
-    while (std::getline(fin, b)) *buff += b;
-    *bytes = buff->length();
+    while (std::getline(fin, b)) buff += b;
     fin.close();
     return true;
     #endif
 }
 
-bool tralloy::data::store(const char *key, const char *buff, int bytes) {
+bool tralloy::data::store(const std::string &key, const std::string &buff) {
     #if defined(__EMSCRIPTEN__)
     int err;
-    emscripten_idb_store(TRALLOY_DB, key, (void *)buff, bytes, &err);
+    emscripten_idb_store(TRALLOY_DB, 
+                         (key + DEFAULT_FILE_EXTENSION).c_str(), 
+                         (void *)buff.c_str(), 
+                         buff.length(), 
+                         &err);
     if (err != 0) return false;
     return true;
     #else
-    std::ofstream fout {key};
-    for (int i {}; i < bytes; ++i) fout << ((char *)(buff))[i];
+    std::ofstream fout {key + DEFAULT_FILE_EXTENSION};
+    fout << buff;
     fout.close();
     return true;
     #endif
 }
 
-bool tralloy::data::remove(const char *key) {
+bool tralloy::data::remove(const std::string &key) {
     #if defined(__EMSCRIPTEN__)
     int err;
-    emscripten_idb_delete(TRALLOY_DB, key, &err);
+    emscripten_idb_delete(TRALLOY_DB, 
+                          (key + DEFAULT_FILE_EXTENSION).c_str(), 
+                          &err);
     if (err != 0) return false;
     return true;
     #else
         #if !defined(WIN32)
-        std::string cmd {"rm -f "};
-        cmd += key;
-        if (system(cmd.c_str()) != 0); // Assume Linux or like OS. Redundant comparison to silent unused return warning.
+        std::string cmd {"rm -f " + key + DEFAULT_FILE_EXTENSION};
+        if (system(cmd.c_str()) != 0) {}; // Assume Linux or like OS. Redundant comparison to silent unused return warning.
         #else
-        std::string cmd {"if exist "};
-        cmd += key;
-        cmd += " del /q ";
-        cmd += key;
-        if (system(cmd.c_str()) != 0); // Assume Windows. Don't know if this command works.
+        std::string cmd {"if exist " + key + DEFAULT_FILE_EXTENSION + " del /q" + key + DEFAULT_FILE_EXTENSION};
+        if (system(cmd.c_str()) != 0) {}; // Assume Windows. Don't know if this command works.
         #endif
     return true;
     #endif

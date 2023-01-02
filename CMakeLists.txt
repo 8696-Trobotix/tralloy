@@ -8,7 +8,7 @@ FetchContent_Declare(ftxui
   GIT_REPOSITORY https://github.com/ArthurSonzogni/ftxui
   # GIT_TAG v3.0.0
   # Version 3.0.0 does not support resizing when in a browser window. Using a manually specified commit here.
-  GIT_TAG dfdbe1eecf0451e0da5420c4b9c39ecb415681ac
+  GIT_TAG 9f9571190a9ce66f31189f65b404d5da849d3b03
 )
 
 FetchContent_GetProperties(ftxui)
@@ -34,7 +34,9 @@ target_link_libraries(tralloy
 )
 
 string(APPEND CMAKE_CXX_FLAGS " -Wall") 
-string(APPEND CMAKE_EXE_LINKER_FLAGS " -O3") # Release. Comment out for faster build.
+string(APPEND CMAKE_CXX_FLAGS " -Wextra") 
+string(APPEND CMAKE_CXX_FLAGS " -pedantic") 
+# string(APPEND CMAKE_EXE_LINKER_FLAGS " -O3") # Release. Comment out for faster build.
 
 if (EMSCRIPTEN) 
   string(APPEND CMAKE_CXX_FLAGS " -s USE_PTHREADS") 

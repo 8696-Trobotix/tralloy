@@ -76,7 +76,7 @@
                 const resize_handler = () => {
                     const {cols, rows} = fit_addon.proposeDimensions();
                     term.resize(cols, rows);
-                    window.Module._ftxui_on_resize(cols, rows);
+                    if (window.Module._ftxui_on_resize != undefined) window.Module._ftxui_on_resize(cols, rows);
                 };
                 const resize_observer = new ResizeObserver(resize_handler);
                 resize_observer.observe(term_element);

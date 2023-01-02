@@ -6,14 +6,14 @@
 For a more customized build experience, this discussion may help: [What flags to compile without CMake, only with g++ via command line?](https://github.com/ArthurSonzogni/FTXUI/discussions/262)
 ## Requirements
 
-| Name               | Description |
-| ------------------ | ----------- |
-| Python             | For web testing. Optional. |
-| Emscripten         | WebAssembly compiler. |
-| g++ / clang / msvc | Native compiler. Optional. |
-| GNU Make           | Build automation tool. |
-| CMake              | Fetch FTXUI and generate Makefiles. |
-| npm                | Install Xterm.js. |
+| Name                                  | Description |
+| ------------------------------------- | ----------- |
+| Python                                | For web testing. Optional. |
+| [Emscripten](https://emscripten.org/) | WebAssembly compiler. |
+| g++ / clang / msvc                    | Native compiler. Optional. |
+| GNU Make                              | Build automation tool. |
+| CMake                                 | Fetch FTXUI and generate Makefiles. |
+| npm                                   | Install Xterm.js. |
 
 ## Dependencies
 > **Note**
@@ -28,7 +28,6 @@ For a more customized build experience, this discussion may help: [What flags to
 1. Replace all occurances of *tralloy* in `CMakeLists.txt` and `src/index.html` with your own project's name.  
 2. Erase the demo found in `src/main.cpp`.  
 3. Make desired changes in C++. FTXUI documentation can be found [here](https://github.com/ArthurSonzogni/FTXUI).  
-> WebAssembly builds, using the HTML file provided, should keep in mind that an FTXUI resize function in `screen_interactive.hpp` is called from JavaScript. The program will not run if this function is not found. Or one could remove the function from the HTML.  
 > Supplemental functions are declared in `addons/include`. Currently, only a persistent storge abstraction has been implemented as files written from C++ in the WASM runtime are erased upon page reload.
 ## Build Instructions
 > **Note**
@@ -38,8 +37,7 @@ For a more customized build experience, this discussion may help: [What flags to
 mkdir native
 cd native
 cmake ..
-# About the maximum concurrency on a 1GB RAM environment.
-# Omit 10 to build as fast as possible.
+# Omit -j 10 to build as fast as possible.
 # Initial build will take the longest due to compiling FTXUI into static libraries.
 make -j 10
 # Use the executable name you selected.
@@ -51,7 +49,7 @@ mkdir wasm
 cd wasm
 mkdir xterm
 # Copy xterm.js, xterm.css, and the two addons into this folder from node_modules.
-# Alternatively, you could ignore this step and use a cached version in the HTML from jsdelivr.
+# Alternatively, you could ignore that step and use a cached version in the HTML from jsdelivr.
 emcmake cmake ..
 # Same thing applies here from native builds.
 make -j 10
@@ -70,7 +68,7 @@ Push changes to GitHub, enable GitHub Pages on the main branch using the `docs` 
 You may need to refresh the page once.
 > **Note**
 > As of the time writing this, browsers that support WebAssembly
-> are blocking some features behind HTTP headers for security (search SharedBufferArray).
+> are blocking some features behind HTTP headers for security (search SharedArrayBuffer).
 > The headers can be supplied through the Python program or JavaScript service worker.
 ## Licenses
 Copyright 2022 Trobotix. See the license file for more details.  

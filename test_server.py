@@ -1,7 +1,7 @@
 #! /usr/bin/python3
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 import sys
-import webbrowser
+# import webbrowser
 
 PORT = 8000
 
@@ -14,7 +14,7 @@ class CustomHTTPRequestHandler(SimpleHTTPRequestHandler):
 
 with HTTPServer(("", PORT), CustomHTTPRequestHandler) as httpd:
     try:
-        webbrowser.open("http://localhost:%s" % PORT)
+        # webbrowser.open("http://localhost:%s" % PORT)
         print("Serving on http://localhost:%s" % PORT)
         httpd.serve_forever()
     finally:

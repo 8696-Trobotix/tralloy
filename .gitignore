@@ -32,11 +32,14 @@
 *.app
 
 # Custom
+wasm/
 native/
 src/xterm/
+node_modules/
+notes.txt
+test.cpp
+.vscode/
 # Can be done in Replit too!
 *.replit
 *.nix
-wasm/
-node_modules/
 *.json
